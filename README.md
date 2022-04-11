@@ -252,3 +252,8 @@ devServer: {
   open: true,
 },
 ```
+
+---
+Researcher
+안수빈
+Daekeun Ko
