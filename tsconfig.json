@@ -1,5 +1,13 @@
 {
   "compilerOptions": {
+    "plugins": [
+      {
+        "name": "typescript-styled-plugin",
+        "lint": {
+          "validProperties": ["label"]
+        }
+      }
+    ],
     "esModuleInterop": true,
     "allowJs": true,
     "sourceMap": true,
