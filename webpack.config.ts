@@ -1,105 +1,111 @@
-import path from 'path';
-import { Configuration as WebpackConfiguration, ProvidePlugin } from 'webpack';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import { ESBuildMinifyPlugin } from 'esbuild-loader';
-import HtmlWebPackPlugin from 'html-webpack-plugin';
-import CopyPlugin from 'copy-webpack-plugin';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import path from "path";
+import { Configuration as WebpackConfiguration, ProvidePlugin } from "webpack";
+import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
+import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
+import { ESBuildMinifyPlugin } from "esbuild-loader";
+import HtmlWebPackPlugin from "html-webpack-plugin";
+import CopyPlugin from "copy-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 
 export default (env: any) => {
-  console.log('WEBPACK_SERVE : ', env.WEBPACK_SERVE);
+  console.log("WEBPACK_SERVE : ", env.WEBPACK_SERVE);
+
+  const devServer: DevServerConfiguration = {
+    historyApiFallback: true,
+    port: 3090,
+    static: { directory: path.resolve(__dirname, "build") },
+    hot: true,
+    open: true,
+  };
 
   const config: WebpackConfiguration = {
-    name: 'pomerium-swap',
-    devtool: env.WEBPACK_SERVE ? 'eval-cheap-module-source-map' : false,
-    mode: env.WEBPACK_SERVE ? 'development' : 'production',
-    cache: { type: env.WEBPACK_SERVE ? 'memory' : 'filesystem' },
+    name: "pomerium-swap",
+    devtool: env.WEBPACK_SERVE ? "eval-cheap-module-source-map" : false,
+    mode: env.WEBPACK_SERVE ? "development" : "production",
+    cache: { type: env.WEBPACK_SERVE ? "memory" : "filesystem" },
     resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-      modules: [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'node_modules')],
+      extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
+      modules: [
+        path.resolve(__dirname, "src"),
+        path.resolve(__dirname, "node_modules"),
+      ],
       alias: {
-        '@': [path.resolve(__dirname, 'src')],
+        "@": [path.resolve(__dirname, "src")],
       },
     },
     entry: {
-      app: './src/App',
+      app: "./src/App",
     },
-    target: ['web', 'es6'],
+    target: ["web", "es6"],
     module: {
       rules: [
         {
           test: /\.tsx?$/,
-          loader: 'esbuild-loader',
+          loader: "esbuild-loader",
           options: {
-            loader: 'tsx',
-            target: 'es2015',
+            loader: "tsx",
+            target: "es2015",
           },
         },
         {
           test: /\.css?$/,
           use: [
-            'style-loader',
+            "style-loader",
             {
               loader: MiniCssExtractPlugin.loader,
               options: {
                 esModule: false,
               },
             },
-            'css-loader',
+            "css-loader",
           ],
         },
         {
           test: /\.(gif|jpg|png|webp|svg)$/,
-          type: 'asset/resource',
+          type: "asset/resource",
         },
       ],
     },
     plugins: [
       new ProvidePlugin({
-        process: 'process/browser',
-        React: 'react',
+        process: "process/browser",
+        React: "react",
       }),
       new CopyPlugin({
-        patterns: [{ from: 'public', to: './' }],
+        patterns: [{ from: "public", to: "./", noErrorOnMissing: true }],
       }),
       new HtmlWebPackPlugin({
-        template: './src/index.html',
-        filename: 'index.html',
+        template: "./src/index.html",
+        filename: "index.html",
         minify: {
           collapseWhitespace: true,
         },
       }),
       new MiniCssExtractPlugin({
-        filename: 'css/[name]-[chunkhash].css',
+        filename: "css/[name]-[chunkhash].css",
       }),
     ],
     output: {
       pathinfo: false,
-      path: path.join(__dirname, 'build'),
-      filename: 'js/[name]-[chunkhash].js',
-      assetModuleFilename: 'img/[hash][ext][query]',
-      publicPath: '/',
+      path: path.join(__dirname, "build"),
+      filename: "js/[name]-[chunkhash].js",
+      assetModuleFilename: "img/[hash][ext][query]",
+      publicPath: "/",
       clean: true,
     },
-    devServer: {
-      historyApiFallback: true,
-      port: 3090,
-      static: { directory: path.resolve(__dirname, 'build') },
-      hot: true,
-      open: true,
-    },
+    devServer,
     optimization: {
       minimizer: [
         new ESBuildMinifyPlugin({
-          target: 'es2015',
+          target: "es2015",
           css: true,
         }),
       ],
     },
     performance: {
-      hints: env.WEBPACK_SERVE ? false : 'warning',
+      hints: env.WEBPACK_SERVE ? false : "warning",
       maxAssetSize: 1048576,
       maxEntrypointSize: 1048576,
     },
@@ -111,7 +117,9 @@ export default (env: any) => {
   }
 
   if (!env.WEBPACK_SERVE && config.plugins) {
-    config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static', openAnalyzer: false }));
+    config.plugins.push(
+      new BundleAnalyzerPlugin({ analyzerMode: "static", openAnalyzer: false })
+    );
   }
 
   return config;
